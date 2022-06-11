@@ -13,6 +13,7 @@ var (
 	errorEmptyInput = errors.New("input is empty")
 	// Use when the expression has number of operands not equal to two
 	errorNotTwoOperands = errors.New("expecting two operands, but received more or less")
+	errorWrongOperator  = errors.New("wrong operator. Please, choose either plus or minus signs")
 )
 
 // Implement a function that computes the sum of two int numbers written as a string
@@ -28,7 +29,7 @@ var (
 func StringSum(input string) (output string, err error) {
 	input = strings.ReplaceAll(input, " ", "")
 	if len(input) == 0 {
-		return "", errorEmptyInput
+		return "", fmt.Errorf("%w", errorEmptyInput)
 	}
 	var sign int
 
@@ -41,16 +42,25 @@ func StringSum(input string) (output string, err error) {
 			input = input[i+1:]
 		}
 	}
-	nbr1, err := strconv.Atoi(string(input[0]))
-	if err != nil {
-		return "", fmt.Errorf(err.Error(), errorNotTwoOperands)
-	}
-	nbr2, err := strconv.Atoi(string(input[2]))
-	if err != nil {
-		return "", fmt.Errorf(err.Error(), errorNotTwoOperands)
-	}
 
-	operator := string(input[1])
+	nbrs := strings.Split(input, "+")
+	operator := "+"
+	if len(nbrs) != 2 {
+		nbrs = strings.Split(input, "-")
+		operator = "-"
+	}
+	if len(nbrs) != 2 {
+		return "", fmt.Errorf("%w", errorNotTwoOperands)
+	}
+	nbr1, err := strconv.Atoi(nbrs[0])
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
+	}
+	nbr2, err := strconv.Atoi(nbrs[1])
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
+
+	}
 
 	if sign == -1 {
 		nbr1 = -nbr1
@@ -63,7 +73,7 @@ func StringSum(input string) (output string, err error) {
 	case "-":
 		res := nbr1 - nbr2
 		return strconv.Itoa(res), nil
+	default:
+		return "", fmt.Errorf("%w", errorWrongOperator)
 	}
-
-	return "", nil
 }
